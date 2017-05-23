@@ -12,8 +12,6 @@
                                top = .75,
                                mid = .5,
                                bottom = .25),
-        # legend.position.left = c(.15, .75),
-        # legend.position.right = c(.8, .75),
         horizontal = FALSE,
         bty = "n"
 ))
@@ -213,12 +211,20 @@ themeJasp = function(graph, xName, yName,
 
         xLim <- range(gBuild$layout$panel_ranges[[1]]$x.major_source)
         yLim <- range(gBuild$layout$panel_ranges[[1]]$y.major_source)
+        dfX <- data.frame(y = -Inf, yend = -Inf, x = xLim[1], xend = xLim[2])
+        dfY <- data.frame(x = -Inf, xend = -Inf, y = yLim[1], yend = yLim[2])
 
         # xLine <- ggplot2::annotate(geom = "segment", y = -Inf, yend = -Inf, x = xLim[1], xend = xLim[2], lwd = 2.5, inherit.aes = FALSE)
         # yLine <- ggplot2::annotate(geom = "segment", x = -Inf, xend = -Inf, y = yLim[1], yend = yLim[2], lwd = 2.5, inherit.aes = FALSE)
-        xLine <- ggplot2::geom_segment(y = -Inf, yend = -Inf, x = xLim[1], xend = xLim[2], lwd = 2.5, inherit.aes = FALSE)
-        yLine <- ggplot2::geom_segment(x = -Inf, xend = -Inf, y = yLim[1], yend = yLim[2], lwd = 2.5, inherit.aes = FALSE)
-
+        # xLine <- ggplot2::geom_segment(y = -Inf, yend = -Inf, x = xLim[1], xend = xLim[2], lwd = 2.5,
+        #                                position = ggplot2::PositionIdentity, stat = ggplot2::StatIdentity)
+        # yLine <- ggplot2::geom_segment(x = -Inf, xend = -Inf, y = yLim[1], yend = yLim[2], lwd = 2.5,
+        #                                position = ggplot2::PositionIdentity, stat = ggplot2::StatIdentity)
+        mapLines <- ggplot2::aes(x = x, y = y, xend = xend, yend = yend)
+        xLine <- ggplot2::geom_segment(data = dfX, mapping = mapLines, lwd = 2.5,
+                                       position = ggplot2::PositionIdentity, stat = ggplot2::StatIdentity, inherit.aes = FALSE)
+        yLine <- ggplot2::geom_segment(data = dfY, mapping = mapLines, lwd = 2.5,
+                                       position = ggplot2::PositionIdentity, stat = ggplot2::StatIdentity, inherit.aes = FALSE)
 
         graph <- graph + xLine + yLine
     }
