@@ -530,7 +530,7 @@ drawBars <- function(graph = drawCanvas(), dat, mapping = NULL, stat="identity",
 }
 
 #' @export
-drawCanvas <- function(xName, yName, xBreaks = NULL, yBreaks = NULL, dat = NULL) {
+drawCanvas <- function(xName, yName, xBreaks = NULL, yBreaks = NULL, dat = NULL, xLabels = NULL, yLabels = NULL) {
 
     if (is.null(dat)) {
 
@@ -558,17 +558,36 @@ drawCanvas <- function(xName, yName, xBreaks = NULL, yBreaks = NULL, dat = NULL)
 
     }
 
+    # perhaps mode?
     xLab <- switch(class(xBreaks),
                    "character" = ggplot2::scale_x_discrete(name = xName, breaks = unique(xBreaks), labels = unique(xBreaks)),
                    "factor" =  ggplot2::scale_x_discrete(name = xName, breaks = unique(xBreaks), labels = levels(xBreaks)),
-                   "numeric" = ggplot2::scale_x_continuous(name = xName, breaks = xBreaks)
+                   "numeric" = ggplot2::scale_x_continuous(name = xName, breaks = xBreaks),
+                   "integer" = ggplot2::scale_x_continuous(name = xName, breaks = xBreaks)
     )
 
     yLab <- switch(class(yBreaks),
                    "character" =  ggplot2::scale_y_discrete(name = yName, breaks = yBreaks, labels = yBreaks),
                    "factor" =  ggplot2::scale_y_discrete(name = yName, breaks = yBreaks, labels = yBreaks),
-                   "numeric" = ggplot2::scale_y_continuous(name = yName, breaks = yBreaks)
+                   "numeric" = ggplot2::scale_y_continuous(name = yName, breaks = yBreaks),
+                   "integer" = ggplot2::scale_y_continuous(name = xName, breaks = xBreaks)
     )
+
+    if (!is.null(xLabels)) {
+        if (length(xLabels) == length(xLab$labels)) {
+            xLab$labels <- xLabels
+        } else {
+            warning("length(xLabels) did not match length of breaks. Argument ignored.")
+        }
+    }
+
+    if (!is.null(yLabels)) {
+        if (length(yLabels) == length(yLab$labels)) {
+            yLab$labels <- yLabels
+        } else {
+            warning("length(yLabels) did not match length of breaks. Argument ignored.")
+        }
+    }
 
     graph <- ggplot2::ggplot() + # data.frame(x = 0, y = 0), ggplot2::aes(x = x, y = y)) +
         ggplot2::geom_blank() + xLab + yLab# + ggplot2::geom_point()

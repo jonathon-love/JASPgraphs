@@ -59,9 +59,9 @@ xName = "speed"
 yName = "dist"
 toPlot = data.frame(x = cars[[xName]], y = cars[[yName]])
 
-g <- drawCanvas(xName = xName, yName = yName, dat = toPlot)
-g <- drawLines(g, dat = toPlot)
-g <- drawPoints(g, dat = toPlot, size = 5)
+g <- drawCanvas(xName = xName, yName = yName, dat = toPlot, xBreaks = seq(5, 25, 5), xLabels = seq(0, 5, 1))
+g <- drawLines(g, dat = toPlot, alpha = .25)
+g <- drawPoints(g, dat = toPlot, size = 5, alpha = .65)
 g <- themeJasp(g)
 
 x11(width = 480, height = 320, pointsize = 12)
