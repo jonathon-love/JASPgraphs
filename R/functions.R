@@ -574,7 +574,7 @@ drawCanvas <- function(xName, yName, xBreaks = NULL, yBreaks = NULL, dat = NULL,
     )
 
     if (!is.null(xLabels)) {
-        if (length(xLabels) == length(xLab$labels)) {
+        if (length(xLabels) == length(xLab$breaks)) {
             xLab$labels <- xLabels
         } else {
             warning("length(xLabels) did not match length of breaks. Argument ignored.")
@@ -582,7 +582,7 @@ drawCanvas <- function(xName, yName, xBreaks = NULL, yBreaks = NULL, dat = NULL,
     }
 
     if (!is.null(yLabels)) {
-        if (length(yLabels) == length(yLab$labels)) {
+        if (length(yLabels) == length(yLab$breaks)) {
             yLab$labels <- yLabels
         } else {
             warning("length(yLabels) did not match length of breaks. Argument ignored.")
