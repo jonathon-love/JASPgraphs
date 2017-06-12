@@ -119,7 +119,7 @@ themeJasp = function(graph, xName, yName,
     }
 
     # actually doing stuff ----
-    gBuild = ggplot2::ggplot_build(graph)
+    gBuild <- ggplot2::ggplot_build(graph)
 
 
     # TRUE if graph contains data, FALSE if graph is input from drawCanvas()
@@ -143,19 +143,19 @@ themeJasp = function(graph, xName, yName,
         # if (is.factor(yBreaks))
         #     yBreaks = levels(yBreaks)
 
-        xCex = 0
-        yCex = 0 #max(c(0, max(nchar(yBreaks, type = "width")) - 4))
+        xCex <- 0
+        yCex <- 0 #max(c(0, max(nchar(yBreaks, type = "width")) - 4))
 
         # }
 
         # margins are c(bottom, left, top right)
-        xMargin = c(20 + 5 * xCex, 0, 0, 0) # margin x-label to x-axis
-        yMargin = c(0, 20 + 5 * yCex, 0, 0) # margin y-label to y-axis
+        xMargin <- c(20 + 5 * xCex, 0, 0, 0) # margin x-label to x-axis
+        yMargin <- c(0, 20 + 5 * yCex, 0, 0) # margin y-label to y-axis
 
     } else {
 
-        xMargin = xyMargin[[1]]
-        yMargin = xyMargin[[2]]
+        xMargin <- xyMargin[[1]]
+        yMargin <- xyMargin[[2]]
 
     }
 
@@ -206,9 +206,20 @@ themeJasp = function(graph, xName, yName,
 
     }
 
-    # remake R's bty = "n"
+    # remake R's bty = "n" ----
     if (bty == "n") {
 
+        # browser()
+        # panelRanges <- gBuild$layout$panel_ranges[[1]]
+        # anyXhasLength0 <- any(lengths(panelRanges[1:7]) == 0)
+        # anyYhasLength0 <- any(lengths(panelRanges[8:14]) == 0)
+        # if (anyXhasLength0 || anyYhasLength0) {
+        #
+        #     prettyBreak <- getPrettyAxisBreaks(gBuild$data[[2]])
+        #     if (anyXhasLength0)
+        #
+        # }
+        # browser()
         xLim <- range(gBuild$layout$panel_ranges[[1]]$x.major_source)
         yLim <- range(gBuild$layout$panel_ranges[[1]]$y.major_source)
         dfX <- data.frame(y = -Inf, yend = -Inf, x = xLim[1], xend = xLim[2])
@@ -220,6 +231,7 @@ themeJasp = function(graph, xName, yName,
         #                                position = ggplot2::PositionIdentity, stat = ggplot2::StatIdentity)
         # yLine <- ggplot2::geom_segment(x = -Inf, xend = -Inf, y = yLim[1], yend = yLim[2], lwd = 2.5,
         #                                position = ggplot2::PositionIdentity, stat = ggplot2::StatIdentity)
+        # browser()
         mapLines <- ggplot2::aes(x = x, y = y, xend = xend, yend = yend)
         xLine <- ggplot2::geom_segment(data = dfX, mapping = mapLines, lwd = 2.5,
                                        position = ggplot2::PositionIdentity, stat = ggplot2::StatIdentity, inherit.aes = FALSE)
@@ -419,6 +431,23 @@ grid_arrange_shared_legend <- function(..., plotList = NULL, nrow = 1, ncol = le
 #
 # }
 
+getPrettyAxisBreaks <- function(dat) {
+
+    if (!all(c("x", "y") %in% names(dat)))
+        stop("INTERNAL: getPrettyAxisBreaks must get a dataframe that has a column named x and a column named y.")
+
+    xBreaks <- switch(class(dat$x),
+                      "numeric" = pretty(dat$x),
+                      unique(dat$x)
+    )
+    yBreaks <- switch(class(dat$y),
+                      "numeric" = pretty(dat$y),
+                      unique(dat$y)
+    )
+    return(list(xBreaks = xBreaks, yBreaks = yBreaks))
+
+}
+
 #' @export
 combinePlots = function(graph1, graph2, position = "posterior_pizza") {
 
@@ -530,32 +559,19 @@ drawBars <- function(graph = drawCanvas(), dat, mapping = NULL, stat="identity",
 }
 
 #' @export
-drawCanvas <- function(xName, yName, xBreaks = NULL, yBreaks = NULL, dat = NULL, xLabels = NULL, yLabels = NULL) {
+drawCanvas <- function(xName, yName, breaks = NULL, xBreaks = NULL, yBreaks = NULL, dat = NULL, xLabels = NULL, yLabels = NULL) {
 
-    if (is.null(dat)) {
+    if (!is.null(dat) && is.null(breaks))
+        breaks <- getPrettyAxisBreaks(dat)
 
-        if (is.null(xBreaks))
-            xBreaks = 0:1
-
-        if (is.null(yBreaks))
-            yBreaks = 0:1
-
-    } else {
-
+    if (!is.null(breaks)) {
         if (is.null(xBreaks)) {
-            xBreaks <- switch(class(dat$x),
-                              "numeric" = pretty(dat[[1]]),
-                              unique(dat[[1]])
-            )
+            xBreaks <- breaks$xBreaks
         }
 
         if (is.null(yBreaks)) {
-            yBreaks <- switch(class(dat$y),
-                              "numeric" = pretty(dat[[2]]),
-                              unique(dat[[2]])
-            )
+            yBreaks <- breaks$yBreaks
         }
-
     }
 
     # perhaps mode?
@@ -563,14 +579,16 @@ drawCanvas <- function(xName, yName, xBreaks = NULL, yBreaks = NULL, dat = NULL,
                    "character" = ggplot2::scale_x_discrete(name = xName, breaks = unique(xBreaks), labels = unique(xBreaks)),
                    "factor" =  ggplot2::scale_x_discrete(name = xName, breaks = unique(xBreaks), labels = levels(xBreaks)),
                    "numeric" = ggplot2::scale_x_continuous(name = xName, breaks = xBreaks),
-                   "integer" = ggplot2::scale_x_continuous(name = xName, breaks = xBreaks)
+                   "integer" = ggplot2::scale_x_continuous(name = xName, breaks = xBreaks),
+                   "NULL" = NULL
     )
 
     yLab <- switch(class(yBreaks),
                    "character" =  ggplot2::scale_y_discrete(name = yName, breaks = yBreaks, labels = yBreaks),
                    "factor" =  ggplot2::scale_y_discrete(name = yName, breaks = yBreaks, labels = yBreaks),
                    "numeric" = ggplot2::scale_y_continuous(name = yName, breaks = yBreaks),
-                   "integer" = ggplot2::scale_y_continuous(name = xName, breaks = xBreaks)
+                   "integer" = ggplot2::scale_y_continuous(name = yName, breaks = yBreaks),
+                   "NULL" = NULL
     )
 
     if (!is.null(xLabels)) {
@@ -591,6 +609,7 @@ drawCanvas <- function(xName, yName, xBreaks = NULL, yBreaks = NULL, dat = NULL,
 
     graph <- ggplot2::ggplot() + # data.frame(x = 0, y = 0), ggplot2::aes(x = x, y = y)) +
         ggplot2::geom_blank() + xLab + yLab# + ggplot2::geom_point()
+
     # graph <- ggplotBtyN(graph, xBreaks = xBreaks, yBreaks = yBreaks, size = 2)
 
     return(graph)
@@ -816,9 +835,11 @@ priorPosteriorPlot <- function(dat, xName, yName = "Density") {
     stopifnot(length(dat) == 3)
     nms1 <- names(dat[[1]])
     nms2 <- names(dat[[2]])
+    breaks <- getPrettyAxisBreaks(dat[[1]])
+
     linesArgs <- list(mapping = ggplot2::aes_string(x = nms1[1], y = nms1[2], linetype = nms1[3]), color = "black")
     pointsArgs <- list(ggplot2::aes_string(x = nms2[1], y = nms2[2]), color = "black", fill = "gray", size = 4, shape = 21, stroke = 1.25)
-    g <- makeGraph(dat = dat, xName = xName, yName = yName,
+    g <- makeGraph(dat = dat, xName = xName, yName = yName, breaks = breaks,
                    graphType = c("drawLines", "drawPoints"),
                    graphArgs = list(linesArgs, pointsArgs),
                    themeArgs = list(plotType = "priorPosteriorPlot", legend.title = "none"))
@@ -850,13 +871,13 @@ priorPosteriorPlot <- function(dat, xName, yName = "Density") {
 
 # convenience plots ----
 #' @export
-makeGraph <- function(dat, graphType, xName, yName, graphArgs = NULL, themeArgs = NULL) {
+makeGraph <- function(dat, graphType, xName, yName, breaks = NULL, graphArgs = NULL, themeArgs = NULL) {
 
     # attempt to understand "graphType"
     graphFun <- understandGraphType(graphType = graphType)
 
     # make an empty graph
-    graph <- drawCanvas(xName = xName, yName = yName)
+    graph <- drawCanvas(xName = xName, yName = yName, breaks = breaks)
 
     if (!is.null(dat)) { # if there is data
 

@@ -46,7 +46,7 @@ toPlot = data.frame(x = iris[[xName]],
                     y = iris[[yName]],
                     g = iris[["Species"]])
 
-g <- drawCanvas(xName = xName, yName = yName)
+g <- drawCanvas(xName = xName, yName = yName)#, dat = dat)
 g <- drawPoints(g, dat = toPlot, size = 4, alpha = .5)
 g <- themeJasp(g)
 
