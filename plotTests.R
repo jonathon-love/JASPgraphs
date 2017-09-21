@@ -1,5 +1,6 @@
 rm(list = ls())
 library(JASPgraphs)
+# library(ggedit)
 # prior posterior plot ----
 
 xCoords = seq(-1, 1, length.out = 1e3)
