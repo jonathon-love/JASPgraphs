@@ -1,5 +1,18 @@
 rm(list = ls())
 library(JASPgraphs)
+library(ggedit)
+# no data ----
+# no axes
+g <- drawAxis(xName = "hoi", yName = "doei")
+g <- themeJasp(g)
+plotThis(g)
+
+# yes axis, but with hidden line
+g <- drawAxis(xName = expression(theta), yName = expression(a^2), xBreaks = -1:1, yBreaks = -1:1,
+              force = TRUE)
+g <- themeJasp(g)
+plotThis(g)
+
 # prior posterior plot ----
 
 xCoords = seq(-1, 1, length.out = 1e3)
@@ -20,14 +33,16 @@ dat <- list(datLines, datPoints, datBF)
 graphOptions(fontsize = 18)
 
 g <- priorPosteriorPlot(dat, xName = expression(rho))
-x11(width = 480, height = 320)
+plotThis(g)
+
+pdf("C:/Users/donvd/Desktop/ggplotTest.pdf", 10, 10)
 print(g)
+dev.off()
 
 graphOptions(fontsize = 26)
 
 g <- priorPosteriorPlot(dat, xName = expression(rho))
-x11(width = 480, height = 320)
-print(g)
+plotThis(g)
 
 # library(ggedit)
 # ggedit(g)
@@ -46,12 +61,12 @@ toPlot = data.frame(x = iris[[xName]],
                     y = iris[[yName]],
                     g = iris[["Species"]])
 
-g <- drawCanvas(xName = xName, yName = yName)#, dat = dat)
-g <- drawPoints(g, dat = toPlot, size = 4, alpha = .5)
+g <- drawPoints(dat = toPlot, size = 4, alpha = .5)
+g <- drawAxis(g, xName = xName, yName = yName, xBreaks = c(0, 5, 10))
 g <- themeJasp(g)
 
-x11(width = 480, height = 320)
-print(g)
+plotThis(g)
+ggedit(g)
 
 # line plots ----
 data("cars", package = "datasets")
@@ -59,7 +74,7 @@ xName = "speed"
 yName = "dist"
 toPlot = data.frame(x = cars[[xName]], y = cars[[yName]])
 
-g <- drawCanvas(xName = xName, yName = yName, dat = toPlot, xBreaks = seq(5, 25, 5), xLabels = seq(0, 5, 1))
+g <- drawAxis(xName = xName, yName = yName, dat = toPlot, xBreaks = seq(5, 25, 5), xLabels = seq(0, 5, 1))
 g <- drawLines(g, dat = toPlot, alpha = .25)
 g <- drawPoints(g, dat = toPlot, size = 5, alpha = .65)
 g <- themeJasp(g)
@@ -75,13 +90,12 @@ yName = "Sepal.Length"
 toPlot = data.frame(x = iris[[xName]],
                     y = iris[[yName]])
 
-g <- drawCanvas(xName = xName, yName = yName, dat = toPlot)
+g <- drawAxis(xName = xName, yName = yName, dat = toPlot, force = TRUE)
 g <- drawSmooth(g, dat = toPlot)
 g <- drawPoints(g, dat = toPlot, size = 4)
 g <- themeJasp(g)
 
-x11(width = 480, height = 320, pointsize = 12)
-print(g)
+plotThis(g)
 
 
 # bar graphs ----
@@ -91,7 +105,7 @@ toPlot <- data.frame(x = mpg$class)
 xName = "Class"
 yName = "Count"
 
-g <- drawCanvas(xName = xName, yName = yName)
+g <- drawAxis(xName = xName, yName = yName)
 g <- drawBars(g, dat = toPlot, size = 4, stat = "count",
               mapping = ggplot2::aes(x = x, fill = x)) + ggplot2::xlab("Class")
 g <- themeJasp(g, horizontal = TRUE)
@@ -120,7 +134,7 @@ rot <- c(0, 90, 180, 270)
 xBreaks = c(seq(1, 15, 5), 15)
 yBreaks = c(seq(1, 15, 5), 15)
 for (i in 1:4) {
-    g <- drawCanvas(xName = "", yName = "", xBreaks = xBreaks, yBreaks = yBreaks)
+    g <- drawAxis(xName = "", yName = "", xBreaks = xBreaks, yBreaks = yBreaks)
     gList[[i]] <- themeJasp(drawHeatmap(graph = g, dat = dat, interpolate = FALSE, rotation = rot[i],
                                         show.legend = i==1), legend.position = "right")
 }

@@ -13,7 +13,9 @@
                                mid = .5,
                                bottom = .25),
         horizontal = FALSE,
-        bty = "n"
+        bty = "n",
+        axisTickLength = ".2",
+        axisTickLengthUnit = "cm"
 ))
 
 #' @export
@@ -62,7 +64,10 @@ graphOptions <- function(...) {
 }
 
 
+# imports ----
+
 # general ----
+
 
 #' @export
 themeJasp = function(graph, xName, yName,
@@ -122,7 +127,7 @@ themeJasp = function(graph, xName, yName,
     gBuild <- ggplot2::ggplot_build(graph)
 
 
-    # TRUE if graph contains data, FALSE if graph is input from drawCanvas()
+    # TRUE if graph contains data, FALSE if graph is input from drawAxis()
     hasData <- !identical(gBuild[["data"]], list(data.frame()))
 
     # possibly redundant.
@@ -219,11 +224,27 @@ themeJasp = function(graph, xName, yName,
         #     if (anyXhasLength0)
         #
         # }
-        # browser()
-        xLim <- range(gBuild$layout$panel_ranges[[1]]$x.major_source)
-        yLim <- range(gBuild$layout$panel_ranges[[1]]$y.major_source)
+        mapLines <- ggplot2::aes(x = x, y = y, xend = xend, yend = yend)
+
+        xBreaks <- gBuild$layout$panel_ranges[[1]]$x.major_source
+        if (length(xBreaks) > 0) {
+        xLim <- range(xBreaks)
         dfX <- data.frame(y = -Inf, yend = -Inf, x = xLim[1], xend = xLim[2])
-        dfY <- data.frame(x = -Inf, xend = -Inf, y = yLim[1], yend = yLim[2])
+        xLine <- ggplot2::geom_segment(data = dfX, mapping = mapLines, lwd = 2.5,
+                                       position = ggplot2::PositionIdentity, stat = ggplot2::StatIdentity, inherit.aes = FALSE)
+        } else {
+            xLine <- NULL
+        }
+
+        yBreaks <- gBuild$layout$panel_ranges[[1]]$y.major_source
+        if (length(yBreaks) > 0) {
+            yLim <- range(yBreaks)
+            dfY <- data.frame(x = -Inf, xend = -Inf, y = yLim[1], yend = yLim[2])
+            yLine <- ggplot2::geom_segment(data = dfY, mapping = mapLines, lwd = 2.5,
+                                           position = ggplot2::PositionIdentity, stat = ggplot2::StatIdentity, inherit.aes = FALSE)
+        } else {
+            yLine <- NULL
+        }
 
         # xLine <- ggplot2::annotate(geom = "segment", y = -Inf, yend = -Inf, x = xLim[1], xend = xLim[2], lwd = 2.5, inherit.aes = FALSE)
         # yLine <- ggplot2::annotate(geom = "segment", x = -Inf, xend = -Inf, y = yLim[1], yend = yLim[2], lwd = 2.5, inherit.aes = FALSE)
@@ -232,11 +253,8 @@ themeJasp = function(graph, xName, yName,
         # yLine <- ggplot2::geom_segment(x = -Inf, xend = -Inf, y = yLim[1], yend = yLim[2], lwd = 2.5,
         #                                position = ggplot2::PositionIdentity, stat = ggplot2::StatIdentity)
         # browser()
-        mapLines <- ggplot2::aes(x = x, y = y, xend = xend, yend = yend)
-        xLine <- ggplot2::geom_segment(data = dfX, mapping = mapLines, lwd = 2.5,
-                                       position = ggplot2::PositionIdentity, stat = ggplot2::StatIdentity, inherit.aes = FALSE)
-        yLine <- ggplot2::geom_segment(data = dfY, mapping = mapLines, lwd = 2.5,
-                                       position = ggplot2::PositionIdentity, stat = ggplot2::StatIdentity, inherit.aes = FALSE)
+
+
 
         graph <- graph + xLine + yLine
     }
@@ -264,6 +282,8 @@ themeJaspRaw = function(legend.position = "none",
                         legend.cex = 1,
                         axis.title.cex = 1,
                         family = NULL,
+                        axisTickLength = graphOptions("axisTickLength"),
+                        axisTickLengthUnit = graphOptions("axisTickLengthUnit"),
                         fontsize = graphOptions("fontsize"),
                         legend.title = ggplot2::element_text(family = family, size = fontsize, hjust = 0.5)) {
 
@@ -271,7 +291,7 @@ themeJaspRaw = function(legend.position = "none",
         # axis
         axis.line = ggplot2::element_blank(),
         axis.text = ggplot2::element_text(family = family, size = fontsize),
-        axis.ticks.length = grid::unit(.5, "cm"), # tick length
+        axis.ticks.length = grid::unit(axisTickLength, axisTickLengthUnit), # tick length
         axis.ticks.x = x_custom(size = 1.25, color = "black"),
         axis.ticks.y = y_custom(size = 1.25, color = "black"),
         axis.title = ggplot2::element_text(family = family, size = axis.title.cex*fontsize),
@@ -475,7 +495,7 @@ combinePlots = function(graph1, graph2, position = "posterior_pizza") {
 }
 
 #' @export
-ggplotBtyN <- function(graph = drawCanvas(), xBreaks = NULL, yBreaks = NULL, ...) {
+ggplotBtyN <- function(graph = drawAxis(), xBreaks = NULL, yBreaks = NULL, ...) {
 
     if (any(is.null(xBreaks), is.null(yBreaks)))
         gBuild = ggplot2::ggplot_build(graph)
@@ -503,6 +523,46 @@ ggplotBtyN <- function(graph = drawCanvas(), xBreaks = NULL, yBreaks = NULL, ...
 }
 
 # low-level plots ----
+
+xAxisBreaksToAxisScale <- function(xBreaks = waiver(), xName = waiver(), xLabels = waiver(), xLimits = waiver(), position = "bottom", ...) {
+
+    return(
+        switch(class(xBreaks),
+               "character" = ggplot2::scale_x_discrete(name = xName, breaks = xBreaks, labels = xLabels, limits = xLimits, position = position, ...),
+               "factor" =    ggplot2::scale_x_discrete(name = xName, breaks = xBreaks, labels = xLabels, limits = xLimits, position = position, ...),
+               "numeric" = ggplot2::scale_x_continuous(name = xName, breaks = xBreaks, labels = xLabels, limits = xLimits, position = position, ...),
+               "integer" = ggplot2::scale_x_continuous(name = xName, breaks = xBreaks, labels = xLabels, limits = xLimits, position = position, ...),
+               "NULL" = NULL
+        )
+    )
+}
+
+yAxisBreaksToAxisScale <- function(yBreaks = waiver(), yName = waiver(), yLabels = waiver(), yLimits = waiver(), position = "left", ...) {
+
+    return(
+        switch(class(yBreaks),
+               "character" =  ggplot2::scale_y_discrete(name = yName, breaks = yBreaks, labels = yLabels, limits = yLimits, position = position, ...),
+               "factor" =     ggplot2::scale_y_discrete(name = yName, breaks = yBreaks, labels = yLabels, limits = yLimits, position = position, ...),
+               "numeric" =  ggplot2::scale_y_continuous(name = yName, breaks = yBreaks, labels = yLabels, limits = yLimits, position = position, ...),
+               "integer" =  ggplot2::scale_y_continuous(name = yName, breaks = yBreaks, labels = yLabels, limits = yLimits, position = position, ...),
+               "NULL" = NULL
+        )
+    )
+}
+
+#' @export
+addAxis <- function(graph, breaks = NULL, name = waiver(), labels = waiver(), limits = waiver(), position = "left", ...) {
+
+    if (position %in% c("left", "right")) {# vertical axis
+        axis <- yAxisBreaksToAxisScale(yBreaks = breaks, yName = name, yLabels = labels, yLimits = limits, ...)
+    } else { # horizontal axis
+        axis <- xAxisBreaksToAxisScale(xBreaks = breaks, xName = name, xLabels = labels, xLimits = limits, ...)
+    }
+
+    return(graph + axis)
+
+}
+
 #' @export
 addLabels <- function(graph, labels, positions = "posterior_pizza", fontsize = graphOptions("fontsize")) {
 
@@ -531,7 +591,50 @@ addLabels <- function(graph, labels, positions = "posterior_pizza", fontsize = g
 }
 
 #' @export
-drawBars <- function(graph = drawCanvas(), dat, mapping = NULL, stat="identity", fill="gray80", show.legend = FALSE, ...) {
+drawAxis <- function(graph = NULL, xName = waiver(), yName = waiver(), breaks = waiver(), xBreaks = waiver(),
+                     yBreaks = waiver(), dat = NULL, xLabels = waiver(), yLabels = waiver(), xLimits = waiver(),
+                     yLimits = waiver(), force = FALSE) {
+
+    if (!is.null(dat) && is.null(breaks))
+        breaks <- getPrettyAxisBreaks(dat)
+
+    if (!is.null(breaks)) {
+        if (is.null(xBreaks)) {
+            xBreaks <- breaks$xBreaks
+        }
+
+        if (is.null(yBreaks)) {
+            yBreaks <- breaks$yBreaks
+        }
+    }
+
+    if (!is.null(xBreaks) && !is.waive(xBreaks) && is.waive(xLimits))
+        xLimits <- range(xBreaks)
+
+    if (!is.null(yBreaks) && !is.waive(yBreaks) && is.waive(yLimits))
+        yLimits <- range(yBreaks)
+
+    if (is.null(graph))
+        graph <- ggplot2::ggplot()
+
+    if (force && is.waive(graph[["data"]])) {
+        dftmp <- data.frame(x = range(xBreaks), y = range(yBreaks))
+        graph <- graph + ggplot2::geom_line(data = dftmp, mapping = ggplot2::aes(x = x, y = y), color = "white")
+    } else {
+        graph <- graph + ggplot2::xlab(xName) + ggplot2::ylab(yName)
+    }
+
+    if (length(graph[["layers"]]) > 0) {
+        graph <- addAxis(graph, breaks = xBreaks, name = xName, labels = xLabels, limits = xLimits, position = "bottom")
+        graph <- addAxis(graph, breaks = yBreaks, name = yName, labels = yLabels, limits = yLimits, position = "left")
+    }
+
+    return(graph)
+
+}
+
+#' @export
+drawBars <- function(graph = drawAxis(), dat, mapping = NULL, stat="identity", fill="gray80", show.legend = FALSE, ...) {
 
     if (is.null(mapping)) {
 
@@ -559,65 +662,7 @@ drawBars <- function(graph = drawCanvas(), dat, mapping = NULL, stat="identity",
 }
 
 #' @export
-drawCanvas <- function(xName, yName, breaks = NULL, xBreaks = NULL, yBreaks = NULL, dat = NULL, xLabels = NULL, yLabels = NULL) {
-
-    if (!is.null(dat) && is.null(breaks))
-        breaks <- getPrettyAxisBreaks(dat)
-
-    if (!is.null(breaks)) {
-        if (is.null(xBreaks)) {
-            xBreaks <- breaks$xBreaks
-        }
-
-        if (is.null(yBreaks)) {
-            yBreaks <- breaks$yBreaks
-        }
-    }
-
-    # perhaps mode?
-    xLab <- switch(class(xBreaks),
-                   "character" = ggplot2::scale_x_discrete(name = xName, breaks = unique(xBreaks), labels = unique(xBreaks)),
-                   "factor" =  ggplot2::scale_x_discrete(name = xName, breaks = unique(xBreaks), labels = levels(xBreaks)),
-                   "numeric" = ggplot2::scale_x_continuous(name = xName, breaks = xBreaks),
-                   "integer" = ggplot2::scale_x_continuous(name = xName, breaks = xBreaks),
-                   "NULL" = NULL
-    )
-
-    yLab <- switch(class(yBreaks),
-                   "character" =  ggplot2::scale_y_discrete(name = yName, breaks = yBreaks, labels = yBreaks),
-                   "factor" =  ggplot2::scale_y_discrete(name = yName, breaks = yBreaks, labels = yBreaks),
-                   "numeric" = ggplot2::scale_y_continuous(name = yName, breaks = yBreaks),
-                   "integer" = ggplot2::scale_y_continuous(name = yName, breaks = yBreaks),
-                   "NULL" = NULL
-    )
-
-    if (!is.null(xLabels)) {
-        if (length(xLabels) == length(xLab$breaks)) {
-            xLab$labels <- xLabels
-        } else {
-            warning("length(xLabels) did not match length of breaks. Argument ignored.")
-        }
-    }
-
-    if (!is.null(yLabels)) {
-        if (length(yLabels) == length(yLab$breaks)) {
-            yLab$labels <- yLabels
-        } else {
-            warning("length(yLabels) did not match length of breaks. Argument ignored.")
-        }
-    }
-
-    graph <- ggplot2::ggplot() + # data.frame(x = 0, y = 0), ggplot2::aes(x = x, y = y)) +
-        ggplot2::geom_blank() + xLab + yLab# + ggplot2::geom_point()
-
-    # graph <- ggplotBtyN(graph, xBreaks = xBreaks, yBreaks = yBreaks, size = 2)
-
-    return(graph)
-
-}
-
-#' @export
-drawHeatmap <- function(graph = drawCanvas(), dat, mapping = NULL, jaspColors = TRUE, interpolate = TRUE,
+drawHeatmap <- function(graph = drawAxis(), dat, mapping = NULL, fillColor = TRUE, interpolate = TRUE,
                         show.legend = FALSE, rotation = 0, n = 5, ...) {
 
     if (!rotation %in% c(0, 90, 180, 270))
@@ -656,11 +701,15 @@ drawHeatmap <- function(graph = drawCanvas(), dat, mapping = NULL, jaspColors = 
 
     }
 
-    if (isTRUE(jaspColors)) {
+    if (isTRUE(fillColor)) {
 
         gradient <- ggplot2::scale_fill_gradientn(colours = c(colorBrewerJasp(n)))
 
-    } else if (is.numeric(jaspColors) && jaspColors > 1) {
+    } else if (is.character(fillColor)) {
+
+        gradient <- ggplot2::scale_fill_gradientn(colours = fillColor)
+
+    } else if (is.numeric(fillColor) && fillColor > 1) {
 
         # todo
 
@@ -695,7 +744,7 @@ rotateMatrix <- function(x, rotation = 90) {
 }
 
 #' @export
-drawLines <- function(graph = drawCanvas(), dat, mapping = NULL, size = 1.25, show.legend = TRUE, ...) {
+drawLines <- function(graph = drawAxis(), dat, mapping = NULL, size = 1.25, show.legend = TRUE, ...) {
 
     if (is.null(mapping)) {
 
@@ -722,7 +771,7 @@ drawLines <- function(graph = drawCanvas(), dat, mapping = NULL, size = 1.25, sh
 }
 
 #' @export
-drawPoints <- function(graph = drawCanvas(), dat, mapping = NULL, size = 1.25,
+drawPoints <- function(graph = drawAxis(), dat, mapping = NULL, size = 1.25,
                        shape = 21, fill = "gray", show.legend = TRUE, ...) {
 
     if (is.null(mapping)) {
@@ -754,7 +803,7 @@ drawSmooth <- function(graph = NULL, dat = NULL, mapping = NULL, size = 2,
         dat <- ggplot2::ggplot_build(graph)$data[[1]][c("x", "y")]
 
     if (is.null(graph))
-        graph <- drawCanvas()
+        graph <- drawAxis()
 
     if (is.null(mapping))
         mapping = ggplot2::aes_(x = dat[[1]], y = dat[[2]])
@@ -768,7 +817,7 @@ drawSmooth <- function(graph = NULL, dat = NULL, mapping = NULL, size = 2,
 }
 
 #' @export
-drawViolin <- function(graph = drawCanvas(), dat = NULL, mapping = NULL, size = 2,
+drawViolin <- function(graph = drawAxis(), dat = NULL, mapping = NULL, size = 2,
                        show.legend = FALSE) {
 
     if (is.null(mapping)) {
@@ -877,7 +926,7 @@ makeGraph <- function(dat, graphType, xName, yName, breaks = NULL, graphArgs = N
     graphFun <- understandGraphType(graphType = graphType)
 
     # make an empty graph
-    graph <- drawCanvas(xName = xName, yName = yName, breaks = breaks)
+    graph <- drawAxis(xName = xName, yName = yName, breaks = breaks)
 
     if (!is.null(dat)) { # if there is data
 
