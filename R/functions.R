@@ -15,7 +15,8 @@
         horizontal = FALSE,
         bty = "n",
         axisTickLength = ".2",
-        axisTickLengthUnit = "cm"
+        axisTickLengthUnit = "cm",
+        ggVersion = as.character(packageVersion("ggplot2"))
 ))
 
 #' @export
@@ -175,7 +176,7 @@ themeJasp = function(graph, xName, yName,
             idxYmax = which.max(yCoords)[1]
             xAtYmax = xCoords[idxYmax]
 
-            plotCenter = mean(gBuild$layout$panel_ranges[[1]]$x.range, na.rm = TRUE)
+            plotCenter = mean(getRanges(gBuild)$x, na.rm = TRUE)
 
             if (isTRUE(xAtYmax > plotCenter)) { # mode right of middle
 
@@ -226,7 +227,9 @@ themeJasp = function(graph, xName, yName,
         # }
         mapLines <- ggplot2::aes(x = x, y = y, xend = xend, yend = yend)
 
-        xBreaks <- gBuild$layout$panel_ranges[[1]]$x.major_source
+        xyBreaks <- getMajorSource(gBuild)
+
+        xBreaks <- xyBreaks$x
         if (length(xBreaks) > 0) {
         xLim <- range(xBreaks)
         dfX <- data.frame(y = -Inf, yend = -Inf, x = xLim[1], xend = xLim[2])
@@ -236,7 +239,7 @@ themeJasp = function(graph, xName, yName,
             xLine <- NULL
         }
 
-        yBreaks <- gBuild$layout$panel_ranges[[1]]$y.major_source
+        yBreaks <- xyBreaks$y
         if (length(yBreaks) > 0) {
             yLim <- range(yBreaks)
             dfY <- data.frame(x = -Inf, xend = -Inf, y = yLim[1], yend = yLim[2])
@@ -619,7 +622,7 @@ drawAxis <- function(graph = NULL, xName = waiver(), yName = waiver(), breaks = 
 
     if (force && is.waive(graph[["data"]])) {
         dftmp <- data.frame(x = range(xBreaks), y = range(yBreaks))
-        graph <- graph + ggplot2::geom_line(data = dftmp, mapping = ggplot2::aes(x = x, y = y), color = "white")
+        graph <- graph + ggplot2::geom_line(data = dftmp, mapping = ggplot2::aes(x = x, y = y), alpha = 0)
     } else {
         graph <- graph + ggplot2::xlab(xName) + ggplot2::ylab(yName)
     }
@@ -634,7 +637,7 @@ drawAxis <- function(graph = NULL, xName = waiver(), yName = waiver(), breaks = 
 }
 
 #' @export
-drawBars <- function(graph = drawAxis(), dat, mapping = NULL, stat="identity", fill="gray80", show.legend = FALSE, ...) {
+drawBars <- function(graph = drawAxis(), dat, mapping = NULL, stat="identity", fill="gray80", width = NULL, show.legend = FALSE, ...) {
 
     if (is.null(mapping)) {
 
@@ -648,17 +651,23 @@ drawBars <- function(graph = drawAxis(), dat, mapping = NULL, stat="identity", f
 
     }
 
-    if ("fill" %in% names(mapping)) {
-        return(
-            graph + ggplot2::geom_bar(data = dat, mapping = mapping,
-                                      stat = stat, show.legend = show.legend, ...)
-        )
-    } else {
-        return(
-            graph + ggplot2::geom_bar(data = dat, mapping = mapping,
-                                      stat = stat, fill = fill, show.legend = show.legend, ...)
-        )
-    }
+    args = list(data = dat, mapping = mapping, fill = fill, stat=stat, width = width, show.legend = show.legend, ...)
+    args[names(args) %in% names(mapping)] <- NULL
+
+    return(graph + do.call(ggplot2::geom_bar, args))
+
+
+    # if ("fill" %in% names(mapping)) {
+    #     return(
+    #         graph + ggplot2::geom_bar(data = dat, mapping = mapping,
+    #                                   stat = stat, show.legend = show.legend, ...)
+    #     )
+    # } else {
+    #     return(
+    #         graph + ggplot2::geom_bar(data = dat, mapping = mapping,
+    #                                   stat = stat, fill = fill, show.legend = show.legend, ...)
+    #     )
+    # }
 }
 
 #' @export
@@ -744,7 +753,8 @@ rotateMatrix <- function(x, rotation = 90) {
 }
 
 #' @export
-drawLines <- function(graph = drawAxis(), dat, mapping = NULL, size = 1.25, show.legend = TRUE, ...) {
+drawLines <- function(graph = drawAxis(), dat, mapping = NULL, size = 1.25,
+                      alpha = 1, show.legend = TRUE, ...) {
 
     if (is.null(mapping)) {
 
@@ -763,10 +773,15 @@ drawLines <- function(graph = drawAxis(), dat, mapping = NULL, size = 1.25, show
 
     }
 
-    return(
-        graph +
-            ggplot2::geom_line(data = dat, mapping = mapping, size = size, show.legend = show.legend, ...)
-    )
+    args = list(data = dat, mapping = mapping, size = size, alpha = alpha, show.legend = show.legend, ...)
+    args[names(args) %in% names(mapping)] <- NULL
+
+    return(graph + do.call(ggplot2::geom_line, args))
+
+    # return(
+    #     graph +
+    #         ggplot2::geom_line(data = dat, mapping = mapping, size = size, show.legend = show.legend, ...)
+    # )
 
 }
 
@@ -793,8 +808,8 @@ drawPoints <- function(graph = drawAxis(), dat, mapping = NULL, size = 1.25,
 }
 
 #' @export
-drawSmooth <- function(graph = NULL, dat = NULL, mapping = NULL, size = 2,
-                       color = "gray", show.legend = FALSE, se = FALSE, ...) {
+drawSmooth <- function(graph = NULL, dat = NULL, mapping = NULL, size = 2, method = "auto",
+                       color = "gray", show.legend = FALSE, se = FALSE, alpha = 1, ...) {
 
     if (is.null(dat) && is.null(graph))
         stop("Argument dat and graph cannot both be NULL.")
@@ -808,11 +823,17 @@ drawSmooth <- function(graph = NULL, dat = NULL, mapping = NULL, size = 2,
     if (is.null(mapping))
         mapping = ggplot2::aes_(x = dat[[1]], y = dat[[2]])
 
-    return(
-        graph +
-            ggplot2::geom_smooth(data = dat, mapping = mapping,
-                                 size = size, color = color, show.legend = show.legend, se = se, ...)
-    )
+    color <- scales::alpha(color, alpha) # workaround since somehow geom_smooth doesn't use alpha
+    args = list(data = dat, mapping = mapping, size = size, color = color, se = se, alpha = alpha, show.legend = show.legend, ...)
+    args[names(args) %in% names(mapping)] <- NULL
+
+    return(graph + do.call(ggplot2::geom_smooth, args))
+
+    # return(
+    #     graph +
+    #         ggplot2::geom_smooth(data = dat, mapping = mapping, alpha = 0.01,
+    #                              size = size, color = color, show.legend = show.legend, se = se, ...)
+    # )
 
 }
 

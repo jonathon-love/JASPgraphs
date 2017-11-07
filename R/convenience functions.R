@@ -9,8 +9,8 @@ plotThis <- function(g, ...) {
         height <- 320
 
     # use dev.new if x11() chrashes.
-    # dev.new(...)
-    x11(width = width, height = height)
+    dev.new(...)
+    # x11(width = width, height = height)
     print(g)
 
 }

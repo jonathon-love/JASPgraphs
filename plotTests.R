@@ -75,9 +75,10 @@ yName = "dist"
 toPlot = data.frame(x = cars[[xName]], y = cars[[yName]])
 
 g <- drawAxis(xName = xName, yName = yName, dat = toPlot, xBreaks = seq(5, 25, 5), xLabels = seq(0, 5, 1))
-g <- drawLines(g, dat = toPlot, alpha = .25)
+g <- drawLines(g, dat = toPlot, alpha = .05)
 g <- drawPoints(g, dat = toPlot, size = 5, alpha = .65)
 g <- themeJasp(g)
+plotThis(g)
 
 x11(width = 480, height = 320, pointsize = 12)
 print(g)
