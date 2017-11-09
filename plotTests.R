@@ -34,6 +34,7 @@ graphOptions(fontsize = 18)
 
 g <- priorPosteriorPlot(dat, xName = expression(rho))
 plotThis(g)
+g2 <- ggedit(g)
 
 pdf("C:/Users/donvd/Desktop/ggplotTest.pdf", 10, 10)
 print(g)
@@ -59,7 +60,7 @@ xName = "Petal.Length"
 yName = "Sepal.Length"
 toPlot = data.frame(x = iris[[xName]],
                     y = iris[[yName]],
-                    g = iris[["Species"]])
+                    Species = iris[["Species"]])
 
 g <- drawPoints(dat = toPlot, size = 4, alpha = .5)
 g <- drawAxis(g, xName = xName, yName = yName, xBreaks = c(0, 5, 10))
