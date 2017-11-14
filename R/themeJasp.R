@@ -147,7 +147,7 @@ themeJasp = function(graph, xName, yName,
     }
 
     # remake R's bty = "n" ----
-    if (bty == "n") {
+    if (is.list(bty) && bty[["type"]] == "n") {
 
         # browser()
         # panelRanges <- gBuild$layout$panel_ranges[[1]]
@@ -167,7 +167,7 @@ themeJasp = function(graph, xName, yName,
         if (length(xBreaks) > 0) {
             xLim <- range(xBreaks)
             dfX <- data.frame(y = -Inf, yend = -Inf, x = xLim[1], xend = xLim[2])
-            xLine <- ggplot2::geom_segment(data = dfX, mapping = mapLines, lwd = 2.5,
+            xLine <- ggplot2::geom_segment(data = dfX, mapping = mapLines, lwd = bty[["ldwX"]],
                                            position = ggplot2::PositionIdentity, stat = ggplot2::StatIdentity, inherit.aes = FALSE)
         } else {
             xLine <- NULL
@@ -177,7 +177,7 @@ themeJasp = function(graph, xName, yName,
         if (length(yBreaks) > 0) {
             yLim <- range(yBreaks)
             dfY <- data.frame(x = -Inf, xend = -Inf, y = yLim[1], yend = yLim[2])
-            yLine <- ggplot2::geom_segment(data = dfY, mapping = mapLines, lwd = 2.5,
+            yLine <- ggplot2::geom_segment(data = dfY, mapping = mapLines, lwd = bty[["lwdY"]],
                                            position = ggplot2::PositionIdentity, stat = ggplot2::StatIdentity, inherit.aes = FALSE)
         } else {
             yLine <- NULL

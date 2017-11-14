@@ -12,8 +12,8 @@
                               mid = .5,
                               bottom = .25),
     horizontal = FALSE,
-    bty = "n",
-    axisTickLength = ".2",
+    bty = list(type = "n", ldwX = 2, lwdY = 2),
+    axisTickLength = ".15",
     axisTickLengthUnit = "cm",
     ggVersion = as.character(packageVersion("ggplot2"))
 ))
