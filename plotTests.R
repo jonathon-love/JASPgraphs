@@ -34,7 +34,7 @@ graphOptions(fontsize = 18)
 
 g <- priorPosteriorPlot(dat, xName = expression(rho))
 plotThis(g)
-g2 <- ggedit(g)
+# g2 <- ggedit(g)
 
 pdf("C:/Users/donvd/Desktop/ggplotTest.pdf", 10, 10)
 print(g)
@@ -67,7 +67,7 @@ g <- drawAxis(g, xName = xName, yName = yName, xBreaks = c(0, 5, 10))
 g <- themeJasp(g)
 
 plotThis(g)
-ggedit(g)
+# ggedit(g)
 
 # line plots ----
 data("cars", package = "datasets")
@@ -132,7 +132,7 @@ corMat <- Matrix::cov2cor(covMat)
 dat <- corMat
 
 gList <- list()
-rot <- c(0, 90, 180, 270)
+rot <- as.character(c(0, 90, 180, 270))
 xBreaks = c(seq(1, 15, 5), 15)
 yBreaks = c(seq(1, 15, 5), 15)
 for (i in 1:4) {
@@ -150,7 +150,8 @@ multiplot(plotList = gList, cols = 2)
 n <- 80
 x <- runif(n, 0, 5)
 y <- 1.1*x + rnorm(n, .1, .2)
-withinSubjectScatter(x, y)
+g <- withinSubjectScatter(x, y)
+plotThis(g)
 
 # multiple variable case
 n <- 80
@@ -160,4 +161,4 @@ y <- 1.1*x + rnorm(n*p, .1, .2)
 x <- as.data.frame(x)
 y <- as.data.frame(y)
 graphs <- withinSubjectScatter(x, y)
-graphs[[1]]
+multiplot(plotList = graphs, cols = 2)

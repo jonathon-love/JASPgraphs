@@ -65,23 +65,6 @@ grid_arrange_shared_legend <- function(..., plotList = NULL, nrow = 1, ncol = le
 #
 # }
 
-getPrettyAxisBreaks <- function(dat) {
-
-    if (!all(c("x", "y") %in% names(dat)))
-        stop("INTERNAL: getPrettyAxisBreaks must get a dataframe that has a column named x and a column named y.")
-
-    xBreaks <- switch(class(dat$x),
-                      "numeric" = pretty(dat$x),
-                      unique(dat$x)
-    )
-    yBreaks <- switch(class(dat$y),
-                      "numeric" = pretty(dat$y),
-                      unique(dat$y)
-    )
-    return(list(xBreaks = xBreaks, yBreaks = yBreaks))
-
-}
-
 #' @export
 combinePlots = function(graph1, graph2, position = "posterior_pizza") {
 

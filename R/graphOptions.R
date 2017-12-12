@@ -3,7 +3,7 @@
     fontsize = 18,
     legend.cex = 1.25,
     legend.position = "auto",
-    axis.title.cex = 1.5,
+    axis.title.cex = 1,
     family = NULL,
     legend.coordinates = list(left = .15,
                               mid = .5,
