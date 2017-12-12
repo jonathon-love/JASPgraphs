@@ -144,3 +144,20 @@ for (i in 1:4) {
 x11(width = 480, height = 320)
 multiplot(plotList = gList, cols = 2)
 
+
+# descriptive plots within subjects ----
+# single case
+n <- 80
+x <- runif(n, 0, 5)
+y <- 1.1*x + rnorm(n, .1, .2)
+withinSubjectScatter(x, y)
+
+# multiple variable case
+n <- 80
+p <- 4
+x <- matrix(runif(n*p, 0, 5), n, p)
+y <- 1.1*x + rnorm(n*p, .1, .2)
+x <- as.data.frame(x)
+y <- as.data.frame(y)
+graphs <- withinSubjectScatter(x, y)
+graphs[[1]]

@@ -14,3 +14,8 @@ plotThis <- function(g, ...) {
     print(g)
 
 }
+
+sameLengths <- function(...) {
+    # checks if all input arguments have the same length
+    return(length(unique(lengths(list(...)))) == 1)
+}
