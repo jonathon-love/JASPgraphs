@@ -1,4 +1,10 @@
-# this file exists because ggplot has a habit of changing standard over time
+# this file exists because ggplot has a habit of changing standards over time
+# it also imports some functions from ggplot
+
+#' @importFrom ggplot2 waiver aes
+
+
+
 
 getMajorSource <- function(gb) {
 
@@ -35,3 +41,7 @@ getRanges <- function(gb) {
 
 
 }
+
+
+is.waive <- function (x) inherits(x, "waiver")
+# waiver <- ggplot2::waiver

@@ -22,17 +22,26 @@ sameLengths <- function(...) {
 
 #' @export
 getPrettyAxisBreaks <- function(x, ...) {
-    UseMethod(generic = "getPrettyAxisBreaks", object = x)
+    force(x)
+    UseMethod("getPrettyAxisBreaks", x)
 }
 
+#' @method getPrettyAxisBreaks numeric
+#' @export
 getPrettyAxisBreaks.numeric <- function(x, ...) {
     return(pretty(x, ...))
 }
 
+#' @method getPrettyAxisBreaks default
+#' @export
 getPrettyAxisBreaks.default <- function(x, ...) {
-    return(unique(x))
+    if (is.numeric(x)) 
+        return(pretty(x, ...))
+    else return(unique(x))
 }
 
+#' @method getPrettyAxisBreaks data.frame
+#' @export
 getPrettyAxisBreaks.data.frame <- function(x, ...) {
 
     if (!all(c("x", "y") %in% names(x)))

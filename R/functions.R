@@ -1,7 +1,3 @@
-# general ----
-
-
-
 #' @export
 grid_arrange_shared_legend <- function(..., plotList = NULL, nrow = 1, ncol = length(list(...)), position = c("bottom", "right")) {
 
@@ -188,48 +184,6 @@ addLabels <- function(graph, labels, positions = "posterior_pizza", fontsize = g
 
 }
 
-#' #' @export
-#' drawAxis <- function(graph = NULL, xName = waiver(), yName = waiver(), breaks = waiver(), xBreaks = waiver(),
-#'                      yBreaks = waiver(), dat = NULL, xLabels = waiver(), yLabels = waiver(), xLimits = waiver(),
-#'                      yLimits = waiver(), force = FALSE) {
-#'
-#'     if (!is.null(dat) && is.null(breaks))
-#'         breaks <- getPrettyAxisBreaks(dat)
-#'
-#'     if (!is.null(breaks)) {
-#'         if (is.null(xBreaks)) {
-#'             xBreaks <- breaks$xBreaks
-#'         }
-#'
-#'         if (is.null(yBreaks)) {
-#'             yBreaks <- breaks$yBreaks
-#'         }
-#'     }
-#'
-#'     if (!is.null(xBreaks) && !is.waive(xBreaks) && is.waive(xLimits))
-#'         xLimits <- range(xBreaks)
-#'
-#'     if (!is.null(yBreaks) && !is.waive(yBreaks) && is.waive(yLimits))
-#'         yLimits <- range(yBreaks)
-#'
-#'     if (is.null(graph))
-#'         graph <- ggplot2::ggplot()
-#'
-#'     if (force && is.waive(graph[["data"]])) {
-#'         dftmp <- data.frame(x = range(xBreaks), y = range(yBreaks))
-#'         graph <- graph + ggplot2::geom_line(data = dftmp, mapping = ggplot2::aes(x = x, y = y), alpha = 0)
-#'     } else {
-#'         graph <- graph + ggplot2::xlab(xName) + ggplot2::ylab(yName)
-#'     }
-#'
-#'     if (length(graph[["layers"]]) > 0) {
-#'         graph <- addAxis(graph, breaks = xBreaks, name = xName, labels = xLabels, limits = xLimits, position = "bottom")
-#'         graph <- addAxis(graph, breaks = yBreaks, name = yName, labels = yLabels, limits = yLimits, position = "left")
-#'     }
-#'
-#'     return(graph)
-#'
-#' }
 #' @export
 drawAxis <- function(graph = NULL, xName = waiver(), yName = waiver(), breaks = waiver(), xBreaks = waiver(),
                      yBreaks = waiver(), dat = NULL, xLabels = waiver(), yLabels = waiver(), xLimits = waiver(),

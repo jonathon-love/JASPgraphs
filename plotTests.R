@@ -81,8 +81,10 @@ g <- drawPoints(g, dat = toPlot, size = 5, alpha = .65)
 g <- themeJasp(g)
 plotThis(g)
 
-x11(width = 480, height = 320, pointsize = 12)
-print(g)
+g <- drawLines(dat = toPlot, alpha = .05)
+g <- drawPoints(g, dat = toPlot, size = 5, alpha = .65)
+g <- themeJasp(g, setAxesBreaks = TRUE)
+plotThis(g)
 
 # line + points ----
 data("iris", package = "datasets")

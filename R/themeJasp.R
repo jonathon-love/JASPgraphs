@@ -1,5 +1,6 @@
 #' @export
 themeJasp = function(graph, xName, yName,
+                     setAxesBreaks = FALSE,
                      plotType = NULL,
                      axis.title.cex = getGraphOption("axis.title.cex"),
                      bty = getGraphOption("bty"),
@@ -144,6 +145,23 @@ themeJasp = function(graph, xName, yName,
 
         legendXY = "none"
 
+    }
+    
+    # determine axis breaks
+    if (hasData && isTRUE(setAxesBreaks) || (is.character(setAxesBreaks) && any(setAxesBreaks %in% c("x", "y")))) {
+        
+        browser()
+        data <- gBuild[["data"]]
+        scaleX <- NULL
+        if (isTRUE(setAxesBreaks) || (is.character(setAxesBreaks) && any(setAxesBreaks %in% "x"))) {
+            xBreaks <- getPrettyAxisBreaks(data[["x"]])
+            
+        }
+        if (isTRUE(setAxesBreaks) || (is.character(setAxesBreaks) && any(setAxesBreaks %in% "y"))) {
+            yBreaks <- getPrettyAxisBreaks(data[["y"]])
+            
+        }
+        
     }
 
     # remake R's bty = "n" ----
