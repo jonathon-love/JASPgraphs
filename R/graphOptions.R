@@ -13,8 +13,8 @@
                               bottom = .25),
     horizontal = FALSE,
     bty = list(type = "n", ldwX = 2, lwdY = 2),
-    axisTickLength = .3,
-    axisTickLengthUnit = "cm",
+    axisTickLength = grid::unit(x = .15, units = "cm"),
+    axisTickWidth = 1.25,
     ggVersion = as.character(packageVersion("ggplot2"))
 ))
 
@@ -61,4 +61,10 @@ graphOptions <- function(...) {
         out <- out[[1]]
 
     return(out)
+}
+
+.onAttach <- function (libname, pkgname) {
+
+    assign(".graphOptions", .graphOptions, envir = as.environment("package:JASPgraphs"))
+
 }

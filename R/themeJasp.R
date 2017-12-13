@@ -1,17 +1,17 @@
 #' @export
 themeJasp = function(graph, xName, yName,
                      plotType = NULL,
-                     axis.title.cex = graphOptions("axis.title.cex"),
-                     bty = graphOptions("bty"),
-                     fontsize = graphOptions("fontsize"),
-                     family = graphOptions("family"),
+                     axis.title.cex = getGraphOption("axis.title.cex"),
+                     bty = getGraphOption("bty"),
+                     fontsize = getGraphOption("fontsize"),
+                     family = getGraphOption("family"),
                      horizontal = FALSE,
-                     legend.cex = graphOptions("legend.cex"),
-                     legend.position = graphOptions("legend.position"),
-                     legend.coordinates = graphOptions("legend.coordinates"),
+                     legend.cex = getGraphOption("legend.cex"),
+                     legend.position = getGraphOption("legend.position"),
+                     legend.coordinates = getGraphOption("legend.coordinates"),
                      legend.title = "auto",
-                     axisTickLength = graphOptions("axisTickLength"),
-                     axisTickLengthUnit = graphOptions("axisTickLengthUnit"),
+                     axisTickLength = getGraphOption("axisTickLength"),
+                     axisTickWidth = getGraphOption("axisTickWidth"),
                      # legend.position.left = graphOptions("legend.position.left"),
                      # legend.position.right = graphOptions("legend.position.right"),
                      xyMargin = "auto") {
@@ -205,10 +205,10 @@ themeJasp = function(graph, xName, yName,
 
     graph <- graph + themeJaspRaw(legend.position = legendXY, xMargin = xMargin, yMargin = yMargin,
                                   legend.cex = legend.cex, axis.title.cex = axis.title.cex, family = family,
-                                  fontsize = fontsize, legend.title = legend.title, axisTickLength = axisTickLength,
-                                  axisTickLengthUnit = axisTickLengthUnit)
+                                  fontsize = fontsize, legend.title = legend.title,
+                                  axisTickLength = axisTickLength, axisTickWidth = axisTickWidth)
 
-    return(graph)
+     return(graph)
 
 }
 
@@ -220,21 +220,22 @@ themeJaspRaw = function(legend.position = "none",
                         legend.cex = 1,
                         axis.title.cex = 1,
                         family = NULL,
-                        axisTickLength = graphOptions("axisTickLength"),
-                        axisTickLengthUnit = graphOptions("axisTickLengthUnit"),
-                        fontsize = graphOptions("fontsize"),
+                        axisTickLength = getGraphOption("axisTickLength"),
+                        axisTickWidth = getGraphOption("axisTickWidth"),
+                        fontsize = getGraphOption("fontsize"),
                         legend.title = ggplot2::element_text(family = family, size = fontsize, hjust = 0.5),
                         Xvjust = NULL, Yvjust = NULL) {
 
+    # TODO: use x_custom & y_custom with ggplot!
     ggplot2::theme(
         # axis
         axis.line = ggplot2::element_blank(),
         axis.text = ggplot2::element_text(family = family, size = fontsize),
-        axis.ticks.length = grid::unit(axisTickLength, axisTickLengthUnit), # tick length
-        axis.ticks.x = x_custom(size = 1.25, color = "black"),
-        axis.ticks.y = y_custom(size = 1.25, color = "black"),
+        axis.ticks.length = axisTickLength, # tick length
+        # axis.ticks.x = x_custom(size = 1.25, color = "black"),
+        # axis.ticks.y = y_custom(size = 1.25, color = "black"),
         axis.title = ggplot2::element_text(family = family, size = axis.title.cex*fontsize),
-        # axis.ticks = ggplot2::element_line(size = 1.25, color = "black"), # tick width
+        axis.ticks = ggplot2::element_line(size = 1.25, color = "black"), # tick width
         axis.title.x = ggplot2::element_text(margin = ggplot2::margin(xMargin)),
         axis.title.y = ggplot2::element_text(margin = ggplot2::margin(yMargin)),
         axis.text.x = ggplot2::element_text(family = family, size = fontsize, vjust = Xvjust),
@@ -254,6 +255,8 @@ themeJaspRaw = function(legend.position = "none",
         panel.background = ggplot2::element_rect(color = "white", fill = "white"),
         plot.title = ggplot2::element_text(family = family, size = fontsize, hjust = 0.5) # center title
     )
+
+
 
 }
 

@@ -1,2 +1,8 @@
 exportPattern("^[[:alpha:]]+")
 importFrom(ggplot2, aes)
+exportClasses(element_custom_x)
+exportClasses(element_custom_y)
+export(x_custom)
+export(y_custom)
+export(element_grob.element_custom_x)
+export(element_grob.element_custom_y)
