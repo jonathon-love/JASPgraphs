@@ -12,7 +12,7 @@
                               mid = .5,
                               bottom = .25),
     horizontal = FALSE,
-    bty = list(type = "n", ldwX = 2, lwdY = 2),
+    bty = list(type = "n", ldwX = 1.75, lwdY = 1.75),
     axisTickLength = grid::unit(x = .15, units = "cm"),
     axisTickWidth = 1.25,
     ggVersion = as.character(packageVersion("ggplot2"))

@@ -17,7 +17,7 @@ legendToPlotRatio <- function(graph,
     plotSize <- as.numeric(grid::convertWidth(grid::grobWidth(grob$grobs[[7]]), unitTo = "inches"))
 
     if (closeDevice) {
-        dev.off()
+        grDevices::dev.off()
         if (removeTempFile) {
             file.remove(deviceOpts[[1]])
         }

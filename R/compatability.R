@@ -5,7 +5,6 @@
 
 
 
-
 getMajorSource <- function(gb) {
 
     # gb: output from ggplot2::ggbuild(ggplot)
