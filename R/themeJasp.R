@@ -247,17 +247,19 @@ themeJaspRaw = function(legend.position = "none",
     # TODO: use x_custom & y_custom with ggplot!
     ggplot2::theme(
         # axis
-        axis.line = ggplot2::element_blank(),
+        axis.line = element_blank(),
         axis.text = ggplot2::element_text(family = family, size = fontsize),
         axis.ticks.length = axisTickLength, # tick length
         # axis.ticks.x = x_custom(size = 1.25, color = "black"),
         # axis.ticks.y = y_custom(size = 1.25, color = "black"),
         axis.title = ggplot2::element_text(family = family, size = axis.title.cex*fontsize),
-        axis.ticks = ggplot2::element_line(size = 1.25, color = "black"), # tick width
-        axis.title.x = ggplot2::element_text(margin = ggplot2::margin(xMargin)),
-        axis.title.y = ggplot2::element_text(margin = ggplot2::margin(yMargin)),
-        axis.text.x = ggplot2::element_text(family = family, size = fontsize, vjust = Xvjust),
-        axis.text.y = ggplot2::element_text(family = family, size = fontsize, vjust = Yvjust),
+        axis.ticks = ggplot2::element_line(size = axisTickWidth, color = "black"), # tick width
+        axis.title.x = ggplot2::element_text(margin = ggplot2::margin(t = 10)),
+        axis.title.y = ggplot2::element_text(margin = ggplot2::margin(r = 10)),
+        axis.text.x = ggplot2::element_text(family = family, colour = "black", size = fontsize, 
+                                            margin = ggplot2::margin(t = 7), vjust = Xvjust),
+        axis.text.y = ggplot2::element_text(family = family, colour = "black", size = fontsize,
+                                            margin = ggplot2::margin(r = 7), vjust = Yvjust),
 
         # legend
         legend.background = ggplot2::element_rect(color = "white", fill = "white"),
@@ -268,9 +270,13 @@ themeJaspRaw = function(legend.position = "none",
         legend.position = legend.position,
 
         # panel
+        panel.border = element_blank(),
         panel.spacing = grid::unit(2, "cm"),
         panel.grid = ggplot2::element_blank(),
         panel.background = ggplot2::element_rect(color = "white", fill = "white"),
+        
+        # plot
+        plot.margin = ggplot2::unit(c(1, 1, 1, 1), "cm"),
         plot.title = ggplot2::element_text(family = family, size = fontsize, hjust = 0.5) # center title
     )
 

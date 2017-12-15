@@ -1,6 +1,6 @@
 # idea: these are adjustable via a preference menu
 .graphOptions <- list2env(list(
-    fontsize = 18,
+    fontsize = 16,
     legend.cex = 1.25,
     legend.position = "auto",
     axis.title.cex = 1,

@@ -1,7 +1,7 @@
 # this file exists because ggplot has a habit of changing standards over time
 # it also imports some functions from ggplot
 
-#' @importFrom ggplot2 waiver aes
+#' @importFrom ggplot2 waiver aes xlab ylab element_blank
 
 
 
