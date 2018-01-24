@@ -53,9 +53,9 @@ makeRect <- function(col = "red", size = 2, fill = scales::alpha("black", 0)) {
     dfrect <- data.frame(xmin = 0, xmax = 1, ymin = 0, ymax = 1)
     
     return(invisible(
-        ggplot(data = dfrect, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)) + 
-            geom_rect(fill = fill, size = size, color = col) + 
-            theme_void()
+        ggplot2::ggplot(data = dfrect, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)) + 
+            ggplot2::geom_rect(fill = fill, size = size, color = col) + 
+            ggplot2::theme_void()
     ))
 }
 
@@ -72,9 +72,9 @@ makeLabel <- function(label, angle = 0, size = 1, family = "serif") {
     }
     
     return(
-        ggplot(df, aes(x, y, label = label)) +
-            geom_text(angle = angle, size = size, family = family, parse = parse) +
-            theme_void()
+        ggplot2::ggplot(df, aes(x, y, label = label)) +
+            ggplot2::geom_text(angle = angle, size = size, family = family, parse = parse) +
+            ggplot2::theme_void()
     )
 }
 
@@ -101,8 +101,8 @@ ggMatrixPlot <- function(plotList = NULL, nr, nc,
         # todo
     }
 
-    firstColHeight <- .1
-    firstRowWidth <- .1
+    firstColHeight <- .05
+    firstRowWidth <- .05
 
     firstColWidth <- (1 - firstRowWidth*(addRightLabels+1)) / nc
     firstRowHeight <- (1 - firstRowWidth*(addBottomLabels+1)) / nr
