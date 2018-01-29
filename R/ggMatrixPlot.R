@@ -231,7 +231,11 @@ ggMatrixPlot.default <- function(plotList = NULL, nr = NULL, nc = NULL,
                                  rightLabels = NULL,
                                  bottomLabels = NULL,
                                  debug = TRUE) {
-    
+    dots <- list(...)
+    defArgs <- list(xOffset = 0.012, yOffset = 0.012)
+    nmsDots <- names(dots)
+    defArgs[names(defArgs) %in% nmsDots] <- dots[nmsDots[nmsDots %in% names(defArgs)]]
+
     if (is.null(plotList) && debug) {
         
         leftLabels <- lapply(seq_len(nr), function(x) makeRect())
@@ -264,7 +268,7 @@ ggMatrixPlot.default <- function(plotList = NULL, nr = NULL, nc = NULL,
                                         yIncrement = firstRowHeight, 
                                         width = firstRowWidth,
                                         height = firstRowHeight,
-                                        yOffset = hasBottomLab*firstColHeight)
+                                        yOffset = hasBottomLab*firstColHeight + defArgs$yOffset)
     }
     # labels above plots
     if (hasTopLab) {
@@ -274,7 +278,7 @@ ggMatrixPlot.default <- function(plotList = NULL, nr = NULL, nc = NULL,
                                           xIncrement = firstColWidth, 
                                           width = firstColWidth, 
                                           height = firstColHeight,
-                                          xOffset = hasLeftLab*firstRowWidth)
+                                          xOffset = hasLeftLab*firstRowWidth + defArgs$xOffset)
     }
     
     if (hasRightLab) { # labels right of plots
@@ -284,7 +288,7 @@ ggMatrixPlot.default <- function(plotList = NULL, nr = NULL, nc = NULL,
                                         yIncrement = firstRowHeight, 
                                         width = firstRowWidth,
                                         height = firstRowHeight,
-                                        yOffset = hasBottomLab*firstColHeight)
+                                        yOffset = hasBottomLab*firstColHeight + defArgs$yOffset)
     }
     
     if (hasBottomLab) { # labels below plots
@@ -294,7 +298,7 @@ ggMatrixPlot.default <- function(plotList = NULL, nr = NULL, nc = NULL,
                                           xIncrement = firstColWidth, 
                                           width = firstColWidth, 
                                           height = firstColHeight,
-                                          xOffset = hasLeftLab*firstRowWidth)
+                                          xOffset = hasLeftLab*firstRowWidth + defArgs$xOffset)
     }
     
     # actually include plots
