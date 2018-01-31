@@ -25,6 +25,7 @@ getGraphOption <- function(x) {
 
 }
 
+#' @export
 setGraphOption <- function (name, value) {
 
     assign(name, value, envir = .graphOptions)

@@ -137,7 +137,7 @@ ggMatrixPlot <- function(plotList = NULL, nr = NULL, nc = NULL,
                          topLabels = NULL,
                          rightLabels = NULL,
                          bottomLabels = NULL,
-                         debug = TRUE) {
+                         debug = FALSE) {
     UseMethod("ggMatrixPlot", plotList)
 }
 
@@ -149,7 +149,7 @@ ggMatrixPlot.matrix <- function(plotList = NULL, nr = NULL, nc = NULL,
                                 topLabels = NULL,
                                 rightLabels = NULL,
                                 bottomLabels = NULL,
-                                debug = TRUE) {
+                                debug = FALSE) {
 
     # dim cannot be NULL since plotList is a matrix
     nr <- dim(plotList)[1L]
@@ -188,7 +188,7 @@ ggMatrixPlot.list <- function(plotList = NULL, nr = NULL, nc = NULL,
                                 topLabels = NULL,
                                 rightLabels = NULL,
                                 bottomLabels = NULL,
-                                debug = TRUE) {
+                                debug = FALSE) {
     if (is.null(layout)) { # was layout supplied?
         stop("Either supply plotList as a matrix or provide a layout argument")
     } else if (!is.matrix(layout)) { # is layout layout a matrix?
@@ -230,11 +230,7 @@ ggMatrixPlot.default <- function(plotList = NULL, nr = NULL, nc = NULL,
                                  topLabels = NULL,
                                  rightLabels = NULL,
                                  bottomLabels = NULL,
-                                 debug = TRUE) {
-    dots <- list(...)
-    defArgs <- list(xOffset = 0.012, yOffset = 0.012)
-    nmsDots <- names(dots)
-    defArgs[names(defArgs) %in% nmsDots] <- dots[nmsDots[nmsDots %in% names(defArgs)]]
+                                 debug = FALSE) {
 
     if (is.null(plotList) && debug) {
         
@@ -246,11 +242,26 @@ ggMatrixPlot.default <- function(plotList = NULL, nr = NULL, nc = NULL,
         dim(plotList) <- c(nr, nc)
         
     }
+    
+    # ugly artefact of the lazy vectorization with lapply in makeLabels
+    if (nr == 1) {
+        leftLabels <- list(leftLabels)
+        rightLabels <- list(rightLabels)
+    }
+    if (nc == 1) {
+        topLabels <- list(topLabels)
+        bottomLabels <- list(bottomLabels)
+    }
 
     hasLeftLab <- !is.null(leftLabels)
     hasTopLab <- !is.null(topLabels)
     hasRightLab <- !is.null(rightLabels)
     hasBottomLab <- !is.null(bottomLabels)
+
+    dots <- list(...)
+    defArgs <- list(xOffset = 0, yOffset = 0) # fill this thing with more default arguments
+    nmsDots <- names(dots)
+    defArgs[names(defArgs) %in% nmsDots] <- dots[nmsDots[nmsDots %in% names(defArgs)]]
     
     firstColHeight <- .05
     firstRowWidth <- .05

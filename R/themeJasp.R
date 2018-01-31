@@ -149,7 +149,7 @@ themeJasp = function(graph, xName, yName,
     
     # determine axis breaks
     if (hasData && isTRUE(setAxesBreaks) || (is.character(setAxesBreaks) && any(setAxesBreaks %in% c("x", "y")))) {
-        
+        stop("Not implemented yet!")
         browser()
         data <- gBuild[["data"]]
         scaleX <- NULL
