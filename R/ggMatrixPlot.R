@@ -1,5 +1,5 @@
 addVerticalLabels <- function(totalGraph, graphs2add, x, yIncrement, width, height, yOffset = 0) {
-    
+
     for (i in seq_along(graphs2add)) {
         if (!is.null(graphs2add[[i]])) {
             totalGraph <- totalGraph + 
@@ -100,10 +100,12 @@ makeLabels.default <- function(label, angle = 0, size = 1, family = "serif") {
         df$label <- eq
     }
     
+    # should inherit current theme from graphOptions
     return(
         ggplot2::ggplot(df, aes(x, y, label = label)) +
             ggplot2::geom_text(angle = angle, size = size, family = family, parse = parse) +
-            ggplot2::theme_void()
+            ggplot2::theme_void() + 
+            ggplot2::theme(plot.background = ggplot2::element_rect(fill = "transparent"))
     )
 }
 
@@ -129,6 +131,47 @@ makeLabels.list <- function(label, angle = 0, size = 1, family = "serif") {
     
 }
 
+modifyAxesLabels <- function(removeXYlabels, plotList) {
+
+    # Error handling
+    if (!is.character(removeXYlabels) || !(all(removeXYlabels %in% c('x', 'y', 'xy', 'none'))))
+        stop("removeXYlabels must be a character and contain either 'x', 'y', 'xy', or 'none'")
+
+    d1 <- dim(plotList)
+    if (is.matrix(removeXYlabels)) {
+        d0 <- dim(removeXYlabels)
+        if (!all(d0 == d1)) {
+            stop(sprintf("Dim(removeXYlabels) does not match dim(plotList) / layout. Got (%d, %d) and expected: (%d, %d).",
+                         d0[1], d0[2], d1[1], d1[2]))
+        }
+    } else {
+        if (!(length(removeXYlabels) == 1 || length(plotList)))
+            stop("removeXYlabels should either have length 1 or length(plotList).")
+        
+        removeXYlabels <- matrix(removeXYlabels, nrow = d1[1], ncol = d1[2])
+    }
+
+    # actually remove labels
+    mrg <- -0.1
+    x <- ggplot2::xlab("")
+    xt <- ggplot2::theme(plot.margin = ggplot2::margin(b = mrg, r = mrg, unit = "cm"))
+    y <- ggplot2::ylab("")
+    yt <- ggplot2::theme(plot.margin = ggplot2::margin(l = mrg, r = mrg, unit = "cm"))
+    xyt <- ggplot2::theme(plot.margin = ggplot2::margin(b = mrg, l = mrg, r = mrg, t = mrg, unit = "cm"))
+    transp <- NULL
+
+    for (i in seq_along(plotList)) {
+        switch(
+            removeXYlabels[i],
+            "x" = {plotList[[i]] <- plotList[[i]] + x + xt + transp},
+            "y" = {plotList[[i]] <- plotList[[i]] + y + yt + transp},
+            "xy" = {plotList[[i]] <- plotList[[i]] + x + y + xyt + transp}
+        )
+    }
+
+    return(plotList)
+
+}
 
 #' @export
 ggMatrixPlot <- function(plotList = NULL, nr = NULL, nc = NULL,
@@ -137,6 +180,8 @@ ggMatrixPlot <- function(plotList = NULL, nr = NULL, nc = NULL,
                          topLabels = NULL,
                          rightLabels = NULL,
                          bottomLabels = NULL,
+                         removeXYlabels = c("xy", "x", "y", "none"),
+                         labelSize = .5*graphOptions("fontsize"),
                          debug = FALSE) {
     UseMethod("ggMatrixPlot", plotList)
 }
@@ -149,6 +194,8 @@ ggMatrixPlot.matrix <- function(plotList = NULL, nr = NULL, nc = NULL,
                                 topLabels = NULL,
                                 rightLabels = NULL,
                                 bottomLabels = NULL,
+                                removeXYlabels = c("xy", "x", "y", "none"),
+                                labelSize = .5*graphOptions("fontsize"),
                                 debug = FALSE) {
 
     # dim cannot be NULL since plotList is a matrix
@@ -162,10 +209,10 @@ ggMatrixPlot.matrix <- function(plotList = NULL, nr = NULL, nc = NULL,
     if (!is.null(dimNms[[2L]]) && is.null(topLabels))
         topLabels <- dimNms[[2L]]
 
-    leftLabels <- makeLabels(leftLabels, angle = 90, size = 5)
-    topLabels <- makeLabels(topLabels, angle = 0, size = 5)
-    rightLabels <- makeLabels(rightLabels, angle = 270, size = 5)
-    bottomLabels <- makeLabels(bottomLabels, angle = 0, size = 5)
+    leftLabels <- makeLabels(leftLabels, angle = 90, size = labelSize)
+    topLabels <- makeLabels(topLabels, angle = 0, size = labelSize)
+    rightLabels <- makeLabels(rightLabels, angle = 270, size = labelSize)
+    bottomLabels <- makeLabels(bottomLabels, angle = 0, size = labelSize)
 
     return(ggMatrixPlot.default(
         plotList = plotList,
@@ -175,7 +222,8 @@ ggMatrixPlot.matrix <- function(plotList = NULL, nr = NULL, nc = NULL,
         leftLabels = leftLabels,
         topLabels = topLabels,
         rightLabels = rightLabels,
-        bottomLabels = bottomLabels
+        bottomLabels = bottomLabels,
+        removeXYlabels = removeXYlabels
     ))
     
 }
@@ -188,6 +236,8 @@ ggMatrixPlot.list <- function(plotList = NULL, nr = NULL, nc = NULL,
                                 topLabels = NULL,
                                 rightLabels = NULL,
                                 bottomLabels = NULL,
+                                removeXYlabels = c("xy", "x", "y", "none"),
+                                labelSize = .5*graphOptions("fontsize"),
                                 debug = FALSE) {
     if (is.null(layout)) { # was layout supplied?
         stop("Either supply plotList as a matrix or provide a layout argument")
@@ -205,10 +255,10 @@ ggMatrixPlot.list <- function(plotList = NULL, nr = NULL, nc = NULL,
         dim(plotList) <- dim(layout)
     }
     
-    leftLabels <- makeLabels(leftLabels, angle = 90, size = 5)
-    topLabels <- makeLabels(topLabels, angle = 0, size = 5)
-    rightLabels <- makeLabels(rightLabels, angle = 270, size = 5)
-    bottomLabels <- makeLabels(bottomLabels, angle = 0, size = 5)
+    leftLabels <- makeLabels(leftLabels, angle = 90, size = labelSize)
+    topLabels <- makeLabels(topLabels, angle = 0, size = labelSize)
+    rightLabels <- makeLabels(rightLabels, angle = 270, size = labelSize)
+    bottomLabels <- makeLabels(bottomLabels, angle = 0, size = labelSize)
 
     return(ggMatrixPlot.default(
         plotList = plotList,
@@ -218,7 +268,8 @@ ggMatrixPlot.list <- function(plotList = NULL, nr = NULL, nc = NULL,
         leftLabels = leftLabels,
         topLabels = topLabels,
         rightLabels = rightLabels,
-        bottomLabels = bottomLabels
+        bottomLabels = bottomLabels,
+        removeXYlabels = removeXYlabels
     ))
     
 }
@@ -230,9 +281,17 @@ ggMatrixPlot.default <- function(plotList = NULL, nr = NULL, nc = NULL,
                                  topLabels = NULL,
                                  rightLabels = NULL,
                                  bottomLabels = NULL,
+                                 removeXYlabels = c("xy", "x", "y", "none"),
+                                 labelSize = .5*graphOptions("fontsize"),
                                  debug = FALSE) {
 
+    removeXYlabels <- match.arg(removeXYlabels)
     if (is.null(plotList) && debug) {
+        
+        if (is.null(nr))
+            nr <- 3
+        if (is.null(nc))
+            nc <- 2
         
         leftLabels <- lapply(seq_len(nr), function(x) makeRect())
         rightLabels <- lapply(seq_len(nr), function(x) makeRect("navajowhite4"))
@@ -242,6 +301,7 @@ ggMatrixPlot.default <- function(plotList = NULL, nr = NULL, nc = NULL,
         dim(plotList) <- c(nr, nc)
         
     }
+    plotList <- modifyAxesLabels(removeXYlabels, plotList)
     
     # ugly artefact of the lazy vectorization with lapply in makeLabels
     if (nr == 1) {
@@ -262,12 +322,12 @@ ggMatrixPlot.default <- function(plotList = NULL, nr = NULL, nc = NULL,
     defArgs <- list(xOffset = 0, yOffset = 0) # fill this thing with more default arguments
     nmsDots <- names(dots)
     defArgs[names(defArgs) %in% nmsDots] <- dots[nmsDots[nmsDots %in% names(defArgs)]]
-    
+
     firstColHeight <- .05
     firstRowWidth <- .05
-    
-    firstColWidth <- (1 - firstRowWidth*(hasLeftLab + hasRightLab)) / nc
-    firstRowHeight <- (1 - firstRowWidth*(hasTopLab + hasBottomLab)) / nr
+
+    firstColWidth <- (1 - firstRowWidth*(0.1 + hasLeftLab + hasRightLab)) / nc
+    firstRowHeight <- (1 - firstRowWidth*(0.1 + hasTopLab + hasBottomLab)) / nr
     # browser()
     # empty plot
     totalGraph <- cowplot::ggdraw(xlim = c(0, 1), ylim = c(0, 1))
@@ -276,10 +336,10 @@ ggMatrixPlot.default <- function(plotList = NULL, nr = NULL, nc = NULL,
         totalGraph <- addVerticalLabels(totalGraph,
                                         graphs2add = leftLabels,
                                         x = 0, 
-                                        yIncrement = firstRowHeight, 
+                                        yIncrement = -firstRowHeight, 
                                         width = firstRowWidth,
                                         height = firstRowHeight,
-                                        yOffset = hasBottomLab*firstColHeight + defArgs$yOffset)
+                                        yOffset = firstRowHeight * (nr - 1) + hasBottomLab*firstColHeight + defArgs$yOffset)
     }
     # labels above plots
     if (hasTopLab) {
@@ -296,10 +356,10 @@ ggMatrixPlot.default <- function(plotList = NULL, nr = NULL, nc = NULL,
         totalGraph <- addVerticalLabels(totalGraph, 
                                         graphs2add = rightLabels,
                                         x = 1 - firstRowWidth, 
-                                        yIncrement = firstRowHeight, 
+                                        yIncrement = -firstRowHeight, 
                                         width = firstRowWidth,
                                         height = firstRowHeight,
-                                        yOffset = hasBottomLab*firstColHeight + defArgs$yOffset)
+                                        yOffset = firstRowHeight * (nr - 1) + hasBottomLab*firstColHeight + defArgs$yOffset)
     }
     
     if (hasBottomLab) { # labels below plots
@@ -311,13 +371,13 @@ ggMatrixPlot.default <- function(plotList = NULL, nr = NULL, nc = NULL,
                                           height = firstColHeight,
                                           xOffset = hasLeftLab*firstRowWidth + defArgs$xOffset)
     }
-    
+
     # actually include plots
     totalGraph <- addCenterPlots(totalGraph, plotList,
                                  xIncrement = firstColWidth, 
-                                 yIncrement = firstRowHeight, 
+                                 yIncrement = -firstRowHeight, 
                                  xOffset = hasLeftLab*firstRowWidth,
-                                 yOffset = hasBottomLab*firstColHeight)
+                                 yOffset = firstRowHeight * nr + (hasBottomLab)*firstColHeight)
     return (totalGraph)
     
 }
