@@ -215,10 +215,9 @@ drawAxis <- function(graph = NULL, xName = waiver(), yName = waiver(), breaks = 
 
     if (force && is.waive(graph[["data"]])) {
         dftmp <- data.frame(x = range(xBreaks), y = range(yBreaks))
-        graph <- graph + ggplot2::geom_line(data = dftmp, mapping = ggplot2::aes(x = x, y = y), color = "white")
-    } else {
-        graph <- graph + ggplot2::xlab(xName) + ggplot2::ylab(yName)
+        graph <- graph + ggplot2::geom_line(data = dftmp, mapping = ggplot2::aes(x = x, y = y), color = "white", alpha = 0)
     }
+    graph <- graph + ggplot2::xlab(xName) + ggplot2::ylab(yName)
 
     if (!is.waive(secondaryXaxis) && !inherits(secondaryXaxis, "AxisSecondary"))
         secondaryXaxis <- do.call(ggplot2::sec_axis, secondaryXaxis)
@@ -333,7 +332,7 @@ drawHeatmap <- function(graph = drawAxis(), dat, mapping = NULL, fillColor = TRU
     args = list(data = dat, mapping = mapping, interpolate = interpolate, show.legend = show.legend, ...)
     args[names(args) %in% names(mapping)] <- NULL
 
-    f <- getFromNamespace(paste0("geom_", geom), "ggplot2")
+    f <- utils::getFromNamespace(paste0("geom_", geom), "ggplot2")
     if (geom != "raster")
         args[["interpolate"]] <- NULL
 
@@ -452,7 +451,7 @@ drawSmooth <- function(graph = NULL, dat = NULL, mapping = NULL, size = 2, metho
 
 #' @export
 drawViolin <- function(graph = drawAxis(), dat = NULL, mapping = NULL, size = 2,
-                       show.legend = FALSE) {
+                       show.legend = FALSE, ...) {
 
     if (is.null(mapping)) {
 
@@ -469,47 +468,6 @@ drawViolin <- function(graph = drawAxis(), dat = NULL, mapping = NULL, size = 2,
     )
 
 }
-
-#' @export
-drawWheel = function(graph = NULL, dat, mapping = NULL, size = 3, show.legend = FALSE, label.cex = .75) {
-
-	if (is.null(mapping)) {
-
-		if (ncol(dat) == 1)
-		    dat$group <- factor(seq_along(dat[[1]]))
-
-		nms <- colnames(dat)
-		mapping <- ggplot2::aes_string(x = 1, y = nms[1], group = nms[2], fill = nms[2], color = nms[2])
-
-	}
-
-	# rotate the wheel so that smaller half is always facing up
-	ma = max(dat$y)
-	mi = min(dat$y)
-	area = mi / (mi + ma)
-	start = 0 + area * pi
-	top = -.5*mi
-	bottom = .5*ma
-
-	return(
-	    ggplot2::ggplot(data = dat, mapping = mapping) +
-	        ggplot2::geom_bar(width = 1, stat = "identity", show.legend = show.legend, size = size) +
-	        ggplot2::coord_polar("y", start = start) +
-	        ggplot2::scale_fill_manual(values = c("white", "darkred")) +
-	        ggplot2::scale_color_manual(values = c("black", "black")) +
-	        ggplot2::theme(
-	            plot.margin = grid::unit(c(2, 1, 2, 1.0), "cm"),
-	            panel.background = ggplot2::element_rect(fill = "white"),
-	            panel.grid = ggplot2::element_blank(),
-	            axis.text = ggplot2::element_blank(),
-	            axis.ticks = ggplot2::element_blank(),
-	            axis.title = ggplot2::element_blank(),
-	            axis.line = ggplot2::element_blank(),
-	            legend.position = "none"
-	        )
-	)
-}
-
 
 # convenience plots ----
 #' @export
@@ -591,7 +549,7 @@ understandGraphType <- function(graphType) {
         # get the function from namespace to avoid any mixups
         if (substr(allGraphs[choice], 1, 4) == "draw") {
 
-            graphFun <- getFromNamespace(x = allGraphs[choice], ns = "JASPgraphs")
+            graphFun <- utils::getFromNamespace(x = allGraphs[choice], ns = "JASPgraphs")
 
         } else {
 
@@ -683,7 +641,7 @@ colorGradientJasp = function(n) {
 
     gradient = grDevices::colorRamp(c("#00a9e6", "#00ba63", "#fb8b00", "#c75327", "#909090"))(n)
     # convert rgb to hex
-    gradient = apply(gradient, 1, function(x) rgb(x[1], x[2], x[3], maxColorValue = 255))
+    gradient = apply(gradient, 1, function(x) grDevices::rgb(x[1], x[2], x[3], maxColorValue = 255))
     return(gradient)
 
 }

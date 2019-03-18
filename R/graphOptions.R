@@ -1,21 +1,22 @@
 # idea: these are adjustable via a preference menu
 .graphOptions <- list2env(list(
-    fontsize = 16,
-    legend.cex = 1.25,
     legend.position = "auto",
-    axis.title.cex = 1,
-    family = NULL,
+    fontsize        = 17L,
+    legend.cex      = 1.25,
+    axis.title.cex  = 1.2,
+    family          = NULL,
     legend.coordinates = list(left = .15,
                               mid = .5,
                               right = .8,
                               top = .75,
                               mid = .5,
                               bottom = .25),
-    horizontal = FALSE,
-    bty = list(type = "n", ldwX = 1.75, lwdY = 1.75),
-    axisTickLength = grid::unit(x = .15, units = "cm"),
-    axisTickWidth = 1.25,
-    ggVersion = as.character(packageVersion("ggplot2"))
+    bty = list(type = "n", ldwX = .3, lwdY = .3),
+    axisTickLength = grid::unit(x = .3, units = "cm"),
+    axisTickWidth = .3,
+    digits = list(axes = 3L, BF = 3L),
+    ggVersion = packageVersion("ggplot2"),
+    debug = TRUE
 ))
 
 #' @export
@@ -26,7 +27,7 @@ getGraphOption <- function(x) {
 }
 
 #' @export
-setGraphOption <- function (name, value) {
+setGraphOption <- function(name, value) {
 
     assign(name, value, envir = .graphOptions)
     return(invisible(value))
